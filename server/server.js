@@ -3515,7 +3515,7 @@ function initializePolisHelpers() {
 
 
   function getServerNameWithProtocol(req) {
-    let server = "https://care-poll.vclass.net";
+    let server = process.env.SERVER_URL;
 
     if (domainOverride) {
       server = req.protocol + "://" + domainOverride;
@@ -3535,7 +3535,7 @@ function initializePolisHelpers() {
       server = "https://survey.pol.is";
     }
 
-    server = "https://care-poll.vclass.net";
+    server = process.env.SERVER_URL;
 
     return server;
   }
@@ -4826,12 +4826,13 @@ Thank you for using CARE`;
 
   function sendVerificaionEmail(req, email, einvite) {
  //   let serverName = getServerNameWithProtocol(req);
+    var server_url =process.env.SERVER_URL;
     let body =
 `Welcome to CARE.OR.TH
 
 Click this link to verify your email address:
 
-https://care-poll.vclass.net/api/v3/verify?e=${einvite}`;
+${server_url}/api/v3/verify?e=${einvite}`;
 
     return sendTextEmail(
       POLIS_FROM_ADDRESS,
@@ -11090,8 +11091,8 @@ Thanks for using Polis!
           "profile",
           "email"
         ],
-        "client_id": "42913403-b647-4c47-8ab7-e0ef390800b8",
-        "client_secret": "33ee3a86-f811-499e-b423-47e9cb6e62cc",
+        "client_id": process.env.KON_CLIENT_ID,
+        "client_secret": process.env.KON_CLIENT_SECRET,
         "authentication_method": "",
         "algorithm": "",
         "key_id": ""
@@ -11121,7 +11122,7 @@ Thanks for using Polis!
         method: 'POST',
         uri: 'https://auth.kon.in.th/oxd/get-authorization-url',
         body: {
-          "oxd_id": "779dee68-df30-45a4-abb4-fb46cda697b7",
+          "oxd_id": process.env.KON_OX_ID,
           "scope": [
             "openid",
             "profile",
@@ -11131,7 +11132,7 @@ Thanks for using Polis!
           "acr_values": [
             "basic_poll-care"
           ],
-          "redirect_uri": "https://care-poll.vclass.net/api/v3/kon_oauth_callback"
+          "redirect_uri": process.env.KON_CALLBACK_URL
         },
         json: true,
         headers: {
@@ -11183,7 +11184,7 @@ Thanks for using Polis!
       method: 'POST',
       uri: 'https://auth.kon.in.th/oxd/get-tokens-by-code',
       body: {
-        "oxd_id": "779dee68-df30-45a4-abb4-fb46cda697b7",
+        "oxd_id": process.env.KON_OX_ID,
         "code": req.p.code,
         "state": req.p.state        
       },
@@ -11203,7 +11204,7 @@ Thanks for using Polis!
         method: 'POST',
         uri: 'https://auth.kon.in.th/oxd/get-user-info',
         body: {
-          "oxd_id": "779dee68-df30-45a4-abb4-fb46cda697b7",
+          "oxd_id": process.env.KON_OX_ID,
           "access_token": req.session.kontoken2
         },
         json: true,
@@ -11301,7 +11302,7 @@ Thanks for using Polis!
               addCookies(req, res, token, uid).then(function() {
                 winston.log("info", "uid", uid);                                
                 //var htmlVar ="<script>alert(1)</script>"               
-                res.redirect( getServerNameWithProtocol(req) + '/konAuthReturn/VoteView');
+                res.redirect( process.env.SERVER_URL + '/konAuthReturn/VoteView');
                 //res.send(htmlVar);
 
               }).catch(function(err) {

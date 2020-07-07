@@ -66,8 +66,8 @@ function EmailSenders(AWS) {
   function sendTextEmail(sender, recipient, subject, text) {
 
     const send = require('gmail-send')({
-      user: 'interlab@ait.asia',
-      pass: '',
+      user: process.env.MAIL_USERNAME,
+      pass: process.env.MAIL_PASSWORD,
       to:   recipient,
       subject: subject,
     });
