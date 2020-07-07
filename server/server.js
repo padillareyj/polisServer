@@ -216,6 +216,8 @@ const winston = console;
 const emailSenders = require('./email/sendEmailSesMailgun').EmailSenders(AWS);
 const sendTextEmail = emailSenders.sendTextEmail;
 const sendTextEmailWithBackupOnly = emailSenders.sendTextEmailWithBackupOnly;
+console.log('sending email');
+console.log(sendTextEmail);
 
 const resolveWith = (x) => { return Promise.resolve(x);};
 const intercomClient = !isTrue(process.env.DISABLE_INTERCOM) ? new IntercomOfficial.Client({'token': process.env.INTERCOM_ACCESS_TOKEN}) : {
@@ -2079,19 +2081,26 @@ function initializePolisHelpers() {
             return conv;
           }
           return Promise.all([
+            
             pgQueryP("select * from xids where owner = ($1) and uid = ($2);", [conv.owner, uid]),
+
             getSocialInfoForUsers([uid], zid),
+            getUserInfoForUid2(uid),
           ]).then(([
             xids,
             info,
+            accountinfo,
           ]) => {
             var socialAccountIsLinked = info.length > 0;
             var hasXid = xids.length > 0;
-            if (socialAccountIsLinked || hasXid) {
+
+
+            if (socialAccountIsLinked || hasXid || accountinfo.email !== null) {
               return conv;
             } else {
               throw "polis_err_post_votes_social_needed";
             }
+
           });
         });
       }
@@ -3506,7 +3515,7 @@ function initializePolisHelpers() {
 
 
   function getServerNameWithProtocol(req) {
-    let server = "https://pol.is";
+    let server = "https://care-poll.vclass.net";
 
     if (domainOverride) {
       server = req.protocol + "://" + domainOverride;
@@ -3525,6 +3534,9 @@ function initializePolisHelpers() {
     if (req.headers.host.includes("survey.pol.is")) {
       server = "https://survey.pol.is";
     }
+
+    server = "https://care-poll.vclass.net";
+
     return server;
   }
 
@@ -4797,13 +4809,13 @@ ${serverName}/pwreset/${pwresettoken}
   function sendEinviteEmail(req, email, einvite) {
     let serverName = getServerNameWithProtocol(req);
     const body =
-`Welcome to pol.is!
+`Welcome to CARE.OR.TH!
 
 Click this link to open your account:
 
 ${serverName}/welcome/${einvite}
 
-Thank you for using Polis`;
+Thank you for using CARE`;
 
     return sendTextEmail(
       POLIS_FROM_ADDRESS,
@@ -4813,18 +4825,18 @@ Thank you for using Polis`;
   }
 
   function sendVerificaionEmail(req, email, einvite) {
-    let serverName = getServerNameWithProtocol(req);
+ //   let serverName = getServerNameWithProtocol(req);
     let body =
-`Welcome to pol.is!
+`Welcome to CARE.OR.TH
 
 Click this link to verify your email address:
 
-${serverName}/api/v3/verify?e=${einvite}`;
+https://care-poll.vclass.net/api/v3/verify?e=${einvite}`;
 
     return sendTextEmail(
       POLIS_FROM_ADDRESS,
       email,
-      "Polis verification",
+      "CARE Email verification",
       body);
   }
 
@@ -5465,6 +5477,7 @@ Email verified! You can close this tab or hit the back button.
 
 
   function handle_POST_auth_login(req, res) {
+    console.log('----login-----------');
     let password = req.p.password;
     let email = req.p.email || "";
     let lti_user_id = req.p.lti_user_id;
@@ -10980,6 +10993,35 @@ Thanks for using Polis!
       });
   }
 
+  // function getKonRequestToken(returnUrl) {
+  //         var options = {
+  //           method: 'POST',
+  //           uri: 'http://posttestserver.com/post.php',
+  //           form: {                
+  //               op_host: 'https://auth.kon.in.th',
+  //               scope: '["openid", "oxd", "profile"]',
+  //               client_id: 'b04e0934-1bb7-493b-8cb3-ed976dc2cb02',
+  //               client_secret: '9b476de3-f688-4063-b935-41056a39a1124',
+  //               authentication_method: '',
+  //               algorithm: '',
+  //               key_id: ''
+  //           },
+  //           headers: {
+  //               /* 'content-type': 'application/x-www-form-urlencoded' */ // Is set automatically
+  //           }
+  //       };
+
+  //       request(options)
+  //       .then(function (response) {
+  //           // POST succeeded...
+  //           console.log(response);
+  //       })
+  //       .catch(function (err) {
+  //           // POST failed...
+  //       });
+
+  // }
+
   function getTwitterRequestToken(returnUrl) {
     let oauth = new OAuth.OAuth(
       'https://api.twitter.com/oauth/request_token', // null
@@ -11018,7 +11060,8 @@ Thanks for using Polis!
     let dest = req.p.dest || "/inbox";
     dest = encodeURIComponent(getServerNameWithProtocol(req) + dest);
     let returnUrl = getServerNameWithProtocol(req) + "/api/v3/twitter_oauth_callback?owner=" + req.p.owner + "&dest=" + dest;
-
+    console.log('return URL');
+    console.log(returnUrl);
     getTwitterRequestToken(returnUrl).then(function(data) {
       winston.log("info", data);
       data += "&callback_url=" + dest;
@@ -11027,6 +11070,273 @@ Thanks for using Polis!
     }).catch(function(err) {
       fail(res, 500, "polis_err_twitter_auth_01", err);
     });
+  }
+
+  function handle_GET_konBtn(req, res) {
+    console.log('handle_GET_konBtn');
+    req.session.applepie = 'yummy';
+    console.log(req.session);
+    console.log(req.session.applepie);
+    
+
+    var options = {
+      method: 'POST',
+      uri: 'https://auth.kon.in.th/oxd/get-client-token',
+      body: {
+        "op_host": "https://auth.kon.in.th",
+        "scope": [
+          "openid",
+          "oxd",
+          "profile",
+          "email"
+        ],
+        "client_id": "42913403-b647-4c47-8ab7-e0ef390800b8",
+        "client_secret": "33ee3a86-f811-499e-b423-47e9cb6e62cc",
+        "authentication_method": "",
+        "algorithm": "",
+        "key_id": ""
+      },
+      json: true,
+      headers: {
+        //'content-type': 'application/json'  // Is set automatically
+      },
+    };
+
+    request(options)
+    .then(function (response) {
+        // POST succeeded...
+     
+      console.log('SUCCEDEDD');
+      console.log(response);
+      console.log('-------ACESS TOKEN -----------');
+      console.log(response.access_token);
+
+      req.session.kontoken = response.access_token;
+      console.log('-------SESSION TOKEN -----------');
+      console.log(req.session.access_token);
+      //let access_token = response.acccess_token;
+      //console.log(access_token);
+    
+      var options2 = {
+        method: 'POST',
+        uri: 'https://auth.kon.in.th/oxd/get-authorization-url',
+        body: {
+          "oxd_id": "779dee68-df30-45a4-abb4-fb46cda697b7",
+          "scope": [
+            "openid",
+            "profile",
+            "email",
+            "oxd"
+          ],
+          "acr_values": [
+            "basic_poll-care"
+          ],
+          "redirect_uri": "https://care-poll.vclass.net/api/v3/kon_oauth_callback"
+        },
+        json: true,
+        headers: {
+          'Authorization': 'Bearer ' + response.access_token  // Is set automatically
+        },
+      };
+      console.log('--------options2---------')
+      console.log(options2)
+      request(options2)
+      .then(function (response) {
+        console.log('https://auth.kon.in.th/oxd/get-client-token');
+        console.log(response);
+        res.redirect(response.authorization_url);
+
+      })  .catch(function (err) {
+        console.log(err);
+        console.log('FAILED ');
+        fail(res, 500, "polis_err_twitter_auth_01", err);
+        // POST failed...
+      }); 
+
+      
+    })
+    .catch(function (err) {
+      console.log(err);
+      console.log('FAILED ');
+      fail(res, 500, "polis_err_twitter_auth_01", err);
+        // POST failed...
+    });
+    //res.redirect("https://auth.kon.in.th/oxauth/th/login.htm" );
+    //console.log('KON Get Btn')
+  }
+
+  function handle_GET_kon_oauth_callback(req, res) {
+     
+    console.log('KON callback');
+    console.log('--SESSION TOKEN---');
+    console.log(req.session.kontoken);
+    console.log('--APPLE PIE---');
+    console.log(req.session.applepie);
+    console.log(req.p.code);
+    console.log(req.p.scope);
+    console.log(req.p.session_id);
+    console.log(req.p.state);
+    console.log(req.p.session_state);
+    console.log(req.p.owner);
+
+    var options = {
+      method: 'POST',
+      uri: 'https://auth.kon.in.th/oxd/get-tokens-by-code',
+      body: {
+        "oxd_id": "779dee68-df30-45a4-abb4-fb46cda697b7",
+        "code": req.p.code,
+        "state": req.p.state        
+      },
+      json: true,
+      headers: {
+        'Authorization': 'Bearer ' + req.session.kontoken  // Is set automatically
+      },
+    };
+
+    request(options)
+    .then(function (response) {
+      console.log('ayyyy done');
+      console.log(response);
+      req.session.kontoken2 = response.access_token;
+
+      var options2 = {
+        method: 'POST',
+        uri: 'https://auth.kon.in.th/oxd/get-user-info',
+        body: {
+          "oxd_id": "779dee68-df30-45a4-abb4-fb46cda697b7",
+          "access_token": req.session.kontoken2
+        },
+        json: true,
+        headers: {
+          'Authorization': 'Bearer ' + req.session.kontoken   
+        },
+      };
+
+      request(options2)
+      .then(function (response) {
+        console.log(response)
+        console.log('CREATE AND OR LOG USER');
+        
+        var email = response.nickname + '@เรย์@คน.ไทย';
+        var hname = response.nickname;
+
+        if (!email){
+          fail(res, 500, "polis_err_reg_need_email", err);
+        }
+
+        if (!_.contains(email, "@") || email.length < 3) {
+          fail(res, 400, "polis_err_reg_bad_email");
+          return;
+        }
+
+        pgQuery("SELECT * FROM users WHERE LOWER(email) = ($1);", [email], function(err, docs) {
+          docs = docs.rows;
+          console.log('SELECT * FROM users WHERE LOWER(email) = ($1)')
+          console.log(docs);
+
+          if (err) {
+            fail(res, 500, "polis_err_reg_fail_to_query_users", err);
+            return;
+
+          } else if (!docs || docs.length === 0) { 
+            console.log('USER DOES NOT EXIST YET')  
+            let site_id = void 0;
+            if (req.p.encodedParams) {
+              let decodedParams = decodeParams(req.p.encodedParams);
+              if (decodedParams.site_id) {        
+                site_id = decodedParams.site_id;
+              }
+            }
+
+            let query = "insert into users " +
+                      "(email, hname, zinvite, oinvite, is_owner" + (site_id ? ", site_id" : "") + ") VALUES " + // TODO use sql query builder
+                      "($1, $2, $3, $4, $5" + (site_id ? ", $6" : "") + ") " + // TODO use sql query builder
+                      "returning uid;";
+
+            let vals = [email, hname, null,  null, true];
+
+            if (site_id) {
+              vals.push(site_id); // TODO use sql query builder
+            }
+
+            pgQuery(query, vals, function(err, result) {
+
+              if (err) {
+                winston.log("info", err);
+                fail(res, 500, "polis_err_reg_failed_to_add_user_record", err);
+                return;
+              }
+              
+              let uid = result && result.rows && result.rows[0] && result.rows[0].uid;
+
+              startSession(uid, function(err, token) {
+                if (err) {
+                  fail(res, 500, "polis_err_reg_failed_to_start_session", err);
+                  return;
+                }
+                addCookies(req, res, token, uid).then(function() {
+       
+                  winston.log("info", "uid", uid);                                
+                  var htmlVar ="<script>alert(1)</script>"   
+                  res.send(htmlVar);
+                 
+                }, function(err) {
+                  fail(res, 500, "polis_err_adding_cookies", err);
+                }).catch(function(err) {
+                  fail(res, 500, "polis_err_adding_user", err);
+                });
+              }); // end startSession
+               
+
+            }); // end insert user        
+
+          } else {
+            console.log('USER ALREADY EXIST');
+            console.log(docs[0]);
+            
+            let uid = docs[0].uid;
+
+            startSession(uid, function(errSess, token) {
+            
+              addCookies(req, res, token, uid).then(function() {
+                winston.log("info", "uid", uid);                                
+                //var htmlVar ="<script>alert(1)</script>"               
+                res.redirect( getServerNameWithProtocol(req) + '/konAuthReturn/VoteView');
+                //res.send(htmlVar);
+
+              }).catch(function(err) {
+                fail(res, 500, "polis_err_adding_cookies", err);
+              });
+            }); // startSession
+
+          }
+
+
+
+        });
+
+       
+
+      }).catch(function (err) {
+        console.log(err);
+        console.log('FAILED ');
+        fail(res, 500, "polis_err_twitter_auth_01", err);
+      // POST failed...
+      }); 
+
+
+      
+
+    })  .catch(function (err) {
+      console.log(err);
+      console.log('FAILED ');
+      fail(res, 500, "polis_err_twitter_auth_01", err);
+      // POST failed...
+    }); 
+
+
+
+
   }
 
 
@@ -11522,6 +11832,9 @@ Thanks for using Polis!
     // TODO "Upon a successful authentication, your callback_url would receive a request containing the oauth_token and oauth_verifier parameters. Your application should verify that the token matches the request token received in step 1."
 
     let dest = req.p.dest;
+    console.log('-----twitter dest after callback----');
+    console.log(dest);
+
     winston.log("info", "twitter_oauth_callback uid", uid);
     winston.log("info", "twitter_oauth_callback params");
     winston.log("info", req.p);
@@ -14864,6 +15177,10 @@ CREATE TABLE slack_user_invites (
     handle_GET_twitter_oauth_callback,
     handle_GET_twitter_users,
     handle_GET_twitterBtn,
+    
+    handle_GET_konBtn,
+    handle_GET_kon_oauth_callback,
+
     handle_GET_users,
     handle_GET_verification,
     handle_GET_votes,

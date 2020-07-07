@@ -8,9 +8,10 @@ const optional = require("optional");
 const server = require('./server');
 
 const polisServerBrand = optional('polisServerBrand');
+const session = require('express-session');
 
 const app = express();
-
+app.use(session({secret:'CHdsPtujIXA/BY5ciFrxASPR3tI6VIRRx33Zsrbq+sQ'}));
 
 console.log('init 1');
 
@@ -144,6 +145,8 @@ helpersInitialized.then(function(o) {
     handle_GET_twitter_oauth_callback,
     handle_GET_twitter_users,
     handle_GET_twitterBtn,
+    handle_GET_konBtn,
+    handle_GET_kon_oauth_callback,
     handle_GET_users,
     handle_GET_verification,
     handle_GET_votes,
@@ -247,7 +250,7 @@ helpersInitialized.then(function(o) {
   app.use(writeDefaultHead);
   app.use(redirectIfWrongDomain);
   app.use(redirectIfApiDomain);
-
+  
   if (devMode) {
     app.use(express.compress());
   } else {
@@ -1088,6 +1091,29 @@ helpersInitialized.then(function(o) {
     want("owner", getBool, assignToP, true),
     handle_GET_twitter_oauth_callback);
 
+
+
+  app.get("/api/v3/konBtn",
+    moveToBody,
+    authOptional(assignToP),
+    want("dest", getStringLimitLength(9999), assignToP),
+    want("owner", getBool, assignToP, true),
+    handle_GET_konBtn);
+
+  app.get("/api/v3/kon_oauth_callback",
+    moveToBody,
+    enableAgid,
+    auth(assignToP),
+    need("code", getStringLimitLength(9999), assignToP),
+    need("scope", getStringLimitLength(9999), assignToP),
+    
+    need("session_id", getStringLimitLength(9999), assignToP), // TODO verify
+    need("state", getStringLimitLength(9999), assignToP), // TODO verify
+    need("session_state", getStringLimitLength(9999), assignToP), // TODO verify  
+    want("owner", getBool, assignToP, true),
+    handle_GET_kon_oauth_callback);
+
+
   app.get("/api/v3/locations",
     moveToBody,
     authOptional(assignToP),
@@ -1390,6 +1416,10 @@ helpersInitialized.then(function(o) {
     'Content-Type': "text/html",
   }));
   app.get(/^\/twitterAuthReturn(\/.*)?$/, makeFileFetcher(hostname, portForParticipationFiles, "/twitterAuthReturn.html", {
+    'Content-Type': "text/html",
+  }));
+
+  app.get(/^\/konAuthReturn(\/.*)?$/, makeFileFetcher(hostname, portForParticipationFiles, "/konAuthReturn.html", {
     'Content-Type': "text/html",
   }));
 

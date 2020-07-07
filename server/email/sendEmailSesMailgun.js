@@ -2,7 +2,9 @@
 "use strict"
 
 const Mailgun = require('mailgun').Mailgun;
-const mailgun = new Mailgun(process.env.MAILGUN_API_KEY);
+const mailgun = new Mailgun('87c34c41-e885f6d9');
+const nodemailer = require("nodemailer");
+
 
 function EmailSenders(AWS) {
   const sesClient = new AWS.SES({apiVersion: '2010-12-01'}); // reads AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY from process.env
@@ -60,16 +62,42 @@ function EmailSenders(AWS) {
     });
   }
 
+
   function sendTextEmail(sender, recipient, subject, text) {
-    let promise = sendTextEmailWithSes(sender, recipient, subject, text).catch(function(err) {
-      console.error("polis_err_primary_email_sender_failed");
-      console.error(err);
-      return sendTextEmailWithBackup(sender, recipient, subject, text);
+
+    const send = require('gmail-send')({
+      user: 'interlab@ait.asia',
+      pass: '',
+      to:   recipient,
+      subject: subject,
     });
-    promise.catch(function(err) {
-      console.error(err);
-    });
-    return promise;
+
+    send({
+      text:   text,  
+    }, (error, result, fullResult) => {
+      if (error) console.error(error);
+      console.log(result);
+    })
+    
+     // let transporter = nodemailer.createTransport({
+     //    host: 'smtp.gmail.com', // Gmail Host
+     //    port: 587, // Port
+     //    secure: true, // this is true as port is 465
+     //    auth: {
+     //        user: 'interlab@ait.asia', // generated ethereal user
+     //        pass: 'interlab2010', // generated ethereal password
+     //    },
+     //  });
+   
+     //  // send mail with defined transport object
+     //  let info =  transporter.sendMail({
+     //      from: '"interlab" <interlab@ait.asia>', // sender address
+     //      to: [recipient], // list of receivers
+     //      subject: subject, // Subject line
+     //      //text: "Hello world?", // plain text body
+     //      html: text, // html body
+     //  });
+
   }
 
   return {

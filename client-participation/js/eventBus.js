@@ -25,6 +25,7 @@ bus.twitterConnected = "twitterConnected";
 bus.twitterConnectedCommentForm = "twitterConnectedCommentForm";
 bus.twitterConnectedParticipationView = "twitterConnectedParticipationView";
 bus.twitterConnectedVoteView = "twitterConnectedVoteView";
+bus.konConnectedVoteView = "konConnectedVoteView";
 bus.visShown = "visShown";
 bus["beforehide:majority"] = "beforehide:majority";
 bus["aftershow:majority"] = "aftershow:majority";

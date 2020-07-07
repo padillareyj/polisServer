@@ -41,6 +41,8 @@ module.exports = Handlebones.ModelView.extend({
 
     "click #facebookButtonVoteView" : "facebookClicked",
     "click #twitterButtonVoteView" : "twitterClicked",
+    "click #konButtonVoteView" : "konClicked",
+    "click #careButtonVoteView" : "careClicked",
     "click #showTranslationButtonVoteView" : "showTranslationClicked",
     "click #hideTranslationButtonVoteView" : "hideTranslationClicked",
 
@@ -215,6 +217,34 @@ module.exports = Handlebones.ModelView.extend({
     // that window will redirect back to a simple page that calls window.opener.twitterStatus("ok")
     var params = 'location=0,status=0,width=800,height=400';
     window.open(document.location.origin + "/api/v3/twitterBtn?owner=false&dest=/twitterAuthReturn/VoteView", 'twitterWindow', params);
+  },
+
+  konClicked: function(e) {
+
+    var that = this;
+    e.preventDefault();
+
+
+    eb.on(eb.konConnectedVoteView, function() {
+      M.addAndSend(M.VOTE_SUBMIT_KN_OK);
+      // wait a bit for new cookies to be ready, or something, then submit comment.
+      setTimeout(function() {
+        that.onAuthSuccess();
+        // CurrentUserModel.update();
+      }, 100);
+    });
+
+    M.addAndSend(M.VOTE_SUBMIT_KN_INIT);
+
+    var params = 'location=0,status=0,width=800,height=400';
+    window.open(document.location.origin + "/api/v3/konBtn?owner=false&dest=/twitterAuthReturn/VoteView", 'konWindow', params);
+    
+  },
+  careClicked: function(e) {
+
+    var params = 'location=0,status=0,width=800,height=400';
+    window.open(document.location.origin + "/api/v3/careBtn?owner=false&dest=/twitterAuthReturn/VoteView", 'konWindow', params);
+    
   },
 
   spamToggle: function() {

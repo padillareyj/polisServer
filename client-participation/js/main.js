@@ -137,6 +137,8 @@ window.addEventListener("message", function(event) {
     eb.trigger(eb.twitterConnectedParticipationView);
   } else if (event.data === "twitterConnectedVoteView") {
     eb.trigger(eb.twitterConnectedVoteView);
+  } else if (event.data === "konConnectedVoteView") {
+    eb.trigger(eb.konConnectedVoteView);
   }
 
 

@@ -187,6 +187,7 @@ module.exports = Handlebones.ModelView.extend({
     "paste #comment_form_textarea": "textChange",
     "click #facebookButtonCommentForm" : "facebookClicked",
     "click #twitterButtonCommentForm" : "twitterClicked",
+    "click #konButtonCommentForm" : "konClicked",
     "click #comment_button": "onSubmitClicked",
   },
   onSubmitClicked: function(e) {
@@ -231,7 +232,7 @@ module.exports = Handlebones.ModelView.extend({
       }
     }
     var xid = Utils.getXid();
-    var hasSocial = window.userObject.hasFacebook || window.userObject.hasTwitter || !_.isUndefined(xid);
+    var hasSocial = window.userObject.hasFacebook || window.userObject.hasTwitter || !_.isUndefined(xid) || window.userObject.email ;
     var needsSocial = preload.firstConv.auth_needed_to_write;
     M.add(M.COMMENT_SUBMIT_CLICK);
     if (hasSocial || !needsSocial) {
@@ -282,6 +283,14 @@ module.exports = Handlebones.ModelView.extend({
     // that window will redirect back to a simple page that calls window.opener.twitterStatus("ok")
     var params = 'location=0,status=0,width=800,height=400';
     window.open(document.location.origin + "/api/v3/twitterBtn?owner=false&dest=/twitterAuthReturn/CommentForm", 'twitterWindow', params);
+  },
+  konClicked: function(e) {
+    var that = this;
+    e.preventDefault();
+ 
+
+    var params = 'location=0,status=0,width=800,height=400';
+    window.open(document.location.origin + "/api/v3/konBtn?owner=false&dest=/konAuthReturn/CommentForm", 'konWindow', params);
   },
   showSocialAuthChoices: function() {
     $("#comment_form_controls").hide();
