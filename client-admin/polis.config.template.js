@@ -2,8 +2,10 @@
 module.exports = {
 
   domainWhitelist: [
-    "^localhost$",
+   "^localhost$",
     "^192\\.168\\.1\\.140$",
+    "^203\\.159\\.31\\.49$",
+    "^care-poll\\.vclass\\.net$",
     "^pol\\.is",
     ".+\\.pol\\.is$",
     "^xip\\.io$",
