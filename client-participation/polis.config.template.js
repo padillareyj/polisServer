@@ -4,7 +4,8 @@ module.exports = {
   domainWhitelist: [
     "^localhost$",
     "^192\\.168\\.1\\.140$",
-    "^pol\\.is",
+    "^203\\.159\\.31\\.49$",
+    "^care-poll\\.vclass\\.net",        
     ".+\\.pol\\.is$",
     "^xip\\.io$",
     ".+\\.xip\\.io$",
@@ -20,7 +21,7 @@ module.exports = {
   DISABLE_INTERCOM: true,
 
   // must register with facebook and get a facebook app id to use the facebook auth features
-  FB_APP_ID: '661042417336977',
+  FB_APP_ID: '754848401953119',
 
   // For data exports
 
