@@ -242,8 +242,22 @@ module.exports = Handlebones.ModelView.extend({
   },
   careClicked: function(e) {
 
+    var that = this;
+    e.preventDefault();
+
+
+    eb.on(eb.careConnectedVoteView, function() {
+      M.addAndSend(M.VOTE_SUBMIT_CR_OK);
+      // wait a bit for new cookies to be ready, or something, then submit comment.
+      setTimeout(function() {
+        that.onAuthSuccess();
+        // CurrentUserModel.update();
+      }, 100);
+    });
+
+    M.addAndSend(M.VOTE_SUBMIT_CR_INIT);
     var params = 'location=0,status=0,width=800,height=400';
-    window.open(document.location.origin + "/api/v3/careBtn?owner=false&dest=/twitterAuthReturn/VoteView", 'konWindow', params);
+    window.open(document.location.origin + "/api/v3/careBtn?owner=false&dest=/twitterAuthReturn/VoteView", 'careWindow', params);
     
   },
 
