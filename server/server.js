@@ -11022,6 +11022,7 @@ Thanks for using Polis!
   //       });
 
   // }
+ 
 
   function getTwitterRequestToken(returnUrl) {
     let oauth = new OAuth.OAuth(
@@ -11072,6 +11073,173 @@ Thanks for using Polis!
       fail(res, 500, "polis_err_twitter_auth_01", err);
     });
   }
+
+  function handle_POST_careLogin(req, res) {
+    
+    var options = {
+      method: 'POST',
+      uri: 'https://care.or.th/api/auth/generate_auth_cookie',
+      form: {
+        // Like <input type="text" name="name">
+        username: req.param('username'),
+        password: req.param('password'),
+      },
+      headers: {
+           /* 'content-type': 'application/x-www-form-urlencoded' */ // Is set automatically
+      },
+      json: true 
+    };
+
+    request(options)
+    .then(function (response) {
+        // POST succeeded...
+      console.log(response.status);
+    
+      if (response.status == 'ok') {
+
+        var email  = response.user.username + '-user@care.or.th';
+        var hname = response.user.displayname;
+
+        pgQuery("SELECT * FROM users WHERE LOWER(email) = ($1);", [email], function(err, docs) {
+          docs = docs.rows;
+
+          if (err) {
+            fail(res, 500, "polis_err_reg_fail_to_query_users", err);
+            return;
+
+          } else if (!docs || docs.length === 0) { 
+            console.log('USER DOES NOT EXIST YET')  
+            let site_id = void 0;
+            if (req.p.encodedParams) {
+              let decodedParams = decodeParams(req.p.encodedParams);
+              if (decodedParams.site_id) {        
+                site_id = decodedParams.site_id;
+              }
+            }
+
+            let query = "insert into users " +
+                      "(email, hname, zinvite, oinvite, is_owner" + (site_id ? ", site_id" : "") + ") VALUES " + // TODO use sql query builder
+                      "($1, $2, $3, $4, $5" + (site_id ? ", $6" : "") + ") " + // TODO use sql query builder
+                      "returning uid;";
+
+            let vals = [email, hname, null,  null, true];
+
+            if (site_id) {
+              vals.push(site_id); // TODO use sql query builder
+            }
+
+            pgQuery(query, vals, function(err, result) {
+
+              if (err) {
+                winston.log("info", err);
+                fail(res, 500, "polis_err_reg_failed_to_add_user_record", err);
+                return;
+              }
+              
+              let uid = result && result.rows && result.rows[0] && result.rows[0].uid;
+
+              startSession(uid, function(err, token) {
+                if (err) {
+                  fail(res, 500, "polis_err_reg_failed_to_start_session", err);
+                  return;
+                }
+                addCookies(req, res, token, uid).then(function() {
+        
+                  winston.log("info", "uid", uid);                                
+                  //var htmlVar ="<script>alert(1)</script>"   
+                  //res.send(htmlVar);
+                  res.redirect( process.env.SERVER_URL + '/konAuthReturn/VoteView');
+                 
+                }, function(err) {
+                  fail(res, 500, "polis_err_adding_cookies", err);
+                }).catch(function(err) {
+                  fail(res, 500, "polis_err_adding_user", err);
+                });
+              }); // end startSession
+               
+
+            }); // end insert user        
+
+          } else {
+            console.log('USER ALREADY EXIST');
+            console.log(docs[0]);
+            
+            let uid = docs[0].uid;
+
+            startSession(uid, function(errSess, token) {
+            
+              addCookies(req, res, token, uid).then(function() {
+                winston.log("info", "uid", uid);                                
+                //var htmlVar ="<script>alert(1)</script>"               
+                res.redirect( process.env.SERVER_URL + '/konAuthReturn/VoteView');
+                //res.send(htmlVar);
+
+              }).catch(function(err) {
+                fail(res, 500, "polis_err_adding_cookies", err);
+              });
+            }); // startSession
+
+          }
+
+
+
+        });
+      
+
+
+      }else{
+        res.set({
+          'Content-Type': 'text/html',
+        });
+        console.log('Invalid username or password');
+        errorMessage = "<div>Invalid Username or password</div>"
+        res.status(200).send(errorMessage);
+
+      }
+    })
+    .catch(function (err) {
+        // POST failed...
+      console.log(err);
+      res.status(200).send("error");
+    });
+
+     
+
+    
+  }
+     
+  function handle_GET_careBtn(req, res) {
+
+  
+
+    res.set({
+      'Content-Type': 'text/html',
+    });
+   
+    
+    let html = "" +
+     "<!DOCTYPE html><html lang='en'>" +
+     '<head>' +
+     '<meta name="viewport" content="width=device-width, initial-scale=1;">' +
+
+     '</head>' +
+     "<body style='max-width:320px; font-family: Futura, Helvetica, sans-serif;'>" +
+      
+      `<form method="post" action="/api/v3/careLogin">
+        <div>Username <input name="username" type="text" value=""></div>
+        <div>Password <input name="password" type="password" value=""></div>
+        <div><input type="submit" value="Login"></div>
+        <input type="hidden" name="action" value="login">
+      </form>
+      `
+      +
+    
+     "</body></html>";
+
+    res.status(200).send(html);
+     
+  }
+
 
   function handle_GET_konBtn(req, res) {
     console.log('handle_GET_konBtn');
@@ -11278,8 +11446,8 @@ Thanks for using Polis!
                 addCookies(req, res, token, uid).then(function() {
        
                   winston.log("info", "uid", uid);                                
-                  var htmlVar ="<script>alert(1)</script>"   
-                  res.send(htmlVar);
+                  res.redirect( process.env.SERVER_URL + '/konAuthReturn/VoteView');
+                  //res.send(htmlVar);
                  
                 }, function(err) {
                   fail(res, 500, "polis_err_adding_cookies", err);
@@ -15181,6 +15349,10 @@ CREATE TABLE slack_user_invites (
     
     handle_GET_konBtn,
     handle_GET_kon_oauth_callback,
+
+    handle_GET_careBtn,
+    handle_POST_careLogin,
+    
 
     handle_GET_users,
     handle_GET_verification,

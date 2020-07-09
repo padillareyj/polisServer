@@ -147,6 +147,8 @@ helpersInitialized.then(function(o) {
     handle_GET_twitterBtn,
     handle_GET_konBtn,
     handle_GET_kon_oauth_callback,
+    handle_GET_careBtn,
+    handle_POST_careLogin,
     handle_GET_users,
     handle_GET_verification,
     handle_GET_votes,
@@ -1113,6 +1115,24 @@ helpersInitialized.then(function(o) {
     want("owner", getBool, assignToP, true),
     handle_GET_kon_oauth_callback);
 
+
+  app.get("/api/v3/careBtn",
+    moveToBody,
+    authOptional(assignToP),
+    want("dest", getStringLimitLength(9999), assignToP),
+    want("owner", getBool, assignToP, true),
+    handle_GET_careBtn);
+
+  app.post("/api/v3/careLogin",
+    moveToBody,
+    enableAgid,
+    auth(assignToP),
+    want("username", getStringLimitLength(9999), assignToP), // TODO verify
+    want("password", getStringLimitLength(9999), assignToP), // TODO verify
+    want("owner", getBool, assignToP, true),
+    handle_POST_careLogin);
+
+  
 
   app.get("/api/v3/locations",
     moveToBody,

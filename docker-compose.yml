@@ -56,18 +56,18 @@ services:
       - "backups:/backups"
       - "postgres:/var/lib/postgresql/data"
 
-  nginx-proxy:
-    container_name: polis-nginx-proxy
-    image: polisdemo/nginx-proxy:dev
-    build:
-      context: ./file-server
-      dockerfile: nginx.Dockerfile
-    depends_on:
-      - "server"
-    networks:
-      - "polis-dev"
-    ports:
-      - "80:80"
+#  nginx-proxy:
+#    container_name: polis-nginx-proxy
+#    image: polisdemo/nginx-proxy:dev
+#    build:
+#      context: ./file-server
+#      dockerfile: nginx.Dockerfile
+#    depends_on:
+#      - "server"
+#    networks:
+#      - "polis-dev"
+#    ports:
+#      - "8080:8080"
 
   file-server:
     container_name: polis-file-server
