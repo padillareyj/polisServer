@@ -236,6 +236,7 @@ gulp.task('embedJs', function() {
     'api/embed.js',
     'api/embedPreprod.js',
     'api/twitterAuthReturn.html',
+    'api/konAuthReturn.html',
     ])
   // .pipe(template({
   //   polisHostName: (preprodMode ? "preprod.pol.is" : "pol.is"),
