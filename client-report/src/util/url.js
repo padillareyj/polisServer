@@ -1,11 +1,11 @@
 // Copyright (C) 2012-present, The Authors. This program is free software: you can redistribute it and/or  modify it under the terms of the GNU Affero General Public License, version 3, as published by the Free Software Foundation. This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more details. You should have received a copy of the GNU Affero General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-var prod = "https://pol.is/";
-var preprod = "https://preprod.pol.is/";
-var embed = "https://embed.pol.is/";
-var survey = "https://survey.pol.is/";
-var polisio = "https://www.polis.io/";
-var localhost = "http://localhost:5000/";
+var prod = "https://care-poll.vclass.net/";
+var preprod = "https://care-poll.vclass.net/";
+var embed = "https://care-poll.vclass.net/";
+var survey = "https://scare-poll.vclass.net/";
+var polisio = "https://care-poll.vclass.net/";
+var localhost = "https://care-poll.vclass.net/";
 var localhost5002 = "http://localhost:5002/";
 var localhost5010 = "http://localhost:5010/";
 
