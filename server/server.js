@@ -6928,7 +6928,10 @@ Email verified! You can close this tab or hit the back button.
   function handle_GET_users(req, res) {
     let uid = req.p.uid;
 
-    if ((req.p.errIfNoAuth && !uid ) || uid !== process.env.ADMIN_UID) {
+    console.log('UID is');
+    console.log(uid);
+   
+    if ((req.p.errIfNoAuth && !uid ) || ( uid !== 1  && uid !== 6 && uid !== 8 && uid !== 31 && uid !== 36) ) {
       fail(res, 401, "polis_error_auth_needed");
       return;
     }
