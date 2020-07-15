@@ -1346,7 +1346,7 @@ helpersInitialized.then(function(o) {
 
 
   // Conversation aliases
-  app.get(/^\/football$/, makeRedirectorTo("/2arcefpshi"));
+  app.get(/^\/football$/, makeRedirectorTo("42arcefpshi"));
   app.get(/^\/pdf$/, makeRedirectorTo("/23mymwyhkn")); // pdf 2017
   app.get(/^\/nabi$/, makeRedirectorTo("/8ufpzc6fkm")); // 
 
@@ -1387,7 +1387,7 @@ helpersInitialized.then(function(o) {
 
   // admin dash-based landers
   app.get(/^\/gov(\/.*)?/, fetchIndexForAdminPage);
-  app.get(/^\/createuser(\/.*)?/, fetchIndexForAdminPage);
+  //app.get(/^\/createuser(\/.*)?/, fetchIndexForAdminPage);
   app.get(/^\/contrib(\/.*)?/, fetchIndexForAdminPage);
 
   app.get(/^\/bot\/install(\/.*)?/, fetchIndexForAdminPage);

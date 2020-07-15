@@ -6928,7 +6928,7 @@ Email verified! You can close this tab or hit the back button.
   function handle_GET_users(req, res) {
     let uid = req.p.uid;
 
-    if (req.p.errIfNoAuth && !uid) {
+    if ((req.p.errIfNoAuth && !uid ) || uid !== process.env.ADMIN_UID) {
       fail(res, 401, "polis_error_auth_needed");
       return;
     }
@@ -11080,12 +11080,12 @@ Thanks for using Polis!
       method: 'POST',
       uri: 'https://care.or.th/api/auth/generate_auth_cookie',
       form: {
-        // Like <input type="text" name="name">
+        
         username: req.param('username'),
         password: req.param('password'),
       },
       headers: {
-           /* 'content-type': 'application/x-www-form-urlencoded' */ // Is set automatically
+          
       },
       json: true 
     };
@@ -11122,7 +11122,7 @@ Thanks for using Polis!
                       "($1, $2, $3, $4, $5" + (site_id ? ", $6" : "") + ") " + // TODO use sql query builder
                       "returning uid;";
 
-            let vals = [email, hname, null,  null, true];
+            let vals = [email, hname, null,  null, false];
 
             if (site_id) {
               vals.push(site_id); // TODO use sql query builder
@@ -11336,18 +11336,6 @@ Thanks for using Polis!
 
   function handle_GET_kon_oauth_callback(req, res) {
      
-    console.log('KON callback');
-    console.log('--SESSION TOKEN---');
-    console.log(req.session.kontoken);
-    console.log('--APPLE PIE---');
-    console.log(req.session.applepie);
-    console.log(req.p.code);
-    console.log(req.p.scope);
-    console.log(req.p.session_id);
-    console.log(req.p.state);
-    console.log(req.p.session_state);
-    console.log(req.p.owner);
-
     var options = {
       method: 'POST',
       uri: 'https://auth.kon.in.th/oxd/get-tokens-by-code',
@@ -11358,7 +11346,7 @@ Thanks for using Polis!
       },
       json: true,
       headers: {
-        'Authorization': 'Bearer ' + req.session.kontoken  // Is set automatically
+        'Authorization': 'Bearer ' + req.session.kontoken   
       },
     };
 
@@ -11422,7 +11410,7 @@ Thanks for using Polis!
                       "($1, $2, $3, $4, $5" + (site_id ? ", $6" : "") + ") " + // TODO use sql query builder
                       "returning uid;";
 
-            let vals = [email, hname, null,  null, true];
+            let vals = [email, hname, null,  null, false];
 
             if (site_id) {
               vals.push(site_id); // TODO use sql query builder
@@ -12001,8 +11989,7 @@ Thanks for using Polis!
     // TODO "Upon a successful authentication, your callback_url would receive a request containing the oauth_token and oauth_verifier parameters. Your application should verify that the token matches the request token received in step 1."
 
     let dest = req.p.dest;
-    console.log('-----twitter dest after callback----');
-    console.log(dest);
+     
 
     winston.log("info", "twitter_oauth_callback uid", uid);
     winston.log("info", "twitter_oauth_callback params");
