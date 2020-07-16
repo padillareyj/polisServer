@@ -7502,7 +7502,7 @@ Email verified! You can close this tab or hit the back button.
   function getComments(o) {
     let commentListPromise = o.moderation ? _getCommentsForModerationList(o) : _getCommentsList(o);
     let convPromise = getConversationInfo(o.zid);
-    //let conv = null;
+    let conv = null;
     return Promise.all([convPromise, commentListPromise]).then(function(a) {
       let rows = a[1];
       conv = a[0];
@@ -7539,7 +7539,8 @@ Email verified! You can close this tab or hit the back button.
       return rows;
     }).then(function(comments) {
 
-      let include_social = false;
+      let include_social = !conv.is_anon && o.include_social;
+      include_social = false
 
       if (include_social) {
         let nonAnonComments = comments.filter(function(c) {
